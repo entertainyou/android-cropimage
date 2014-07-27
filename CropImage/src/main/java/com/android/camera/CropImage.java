@@ -40,6 +40,7 @@ import android.graphics.Region;
 import android.graphics.PorterDuff.Mode;
 import android.media.FaceDetector;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -100,6 +101,17 @@ public class CropImage extends MonitoredActivity {
         setContentView(R.layout.cropimage);
 
         mImageView = (CropImageView) findViewById(R.id.image);
+
+        // Work-around for devices incapable of using hardware-accelerated clipPath.
+        // (android.view.GLES20Canvas.clipPath)
+        //
+        // See also:
+        // - https://code.google.com/p/android/issues/detail?id=20474
+        // - https://github.com/lvillani/android-cropimage/issues/20
+        //
+        if (Build.VERSION.SDK_INT < 16) { // Jelly Bean
+            mImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
